@@ -3,7 +3,10 @@ const bodyParser = require('body-parser');
 
 const Leaders = require('../models/leaders');
 
+var authenticate = require('../authenticate');
+
 const leaderRouter = express.Router();
+
 
 leaderRouter.use(bodyParser.json());
 
@@ -17,7 +20,7 @@ leaderRouter.route('/')
 	}, (err) => next(err))
 	.catch((err) => next(err));
 })
-.post((req,res,next) => {
+.post(authenticate.verifyUser, (req,res,next) => {
 	Leaders.create(req.body)
 	.then((leader) => {
 		res.statusCode = 200;
@@ -26,11 +29,11 @@ leaderRouter.route('/')
 	}, (err) => next(err))
 	.catch((err) => next(err));
 })
-.put((req,res,next) => {
+.put(authenticate.verifyUser, (req,res,next) => {
 	res.statusCode = 403;
 	res.end("PUT operation is not supoorted on /leaders");
 })
-.delete((req,res,next) => {
+.delete(authenticate.verifyUser, (req,res,next) => {
 	Leaders.remove({})
 	.then((resp) => {
 		res.statusCode = 200;
@@ -51,11 +54,11 @@ leaderRouter.route('/:leaderId')
 	}, (err) => next(err))
 	.catch((err) => next(err));
 })
-.post((req,res,next) => {
+.post(authenticate.verifyUser, (req,res,next) => {
   res.statusCode = 403;
   res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
 })
-.put((req,res,next) => {
+.put(authenticate.verifyUser, (req,res,next) => {
 	Leaders.findByIdAndUpdate(req.params.leaderId, {
 		$set: req.body,
 	}, {
@@ -68,7 +71,7 @@ leaderRouter.route('/:leaderId')
 	}, (err) => next(err))
 	.catch((err) => next(err));
 })
-.delete((req,res,next) => {
+.delete(authenticate.verifyUser, (req,res,next) => {
 	Leaders.findByIdAndRemove(req.params.leaderId)
 	.then((resp) => {
 		res.statusCode = 200;
@@ -79,51 +82,3 @@ leaderRouter.route('/:leaderId')
 });
 
 module.exports = leaderRouter;
-
-// const express = require('express');
-// const bodyParser = require('body-parser');
-
-// const leaderRouter = express.Router();
-
-// leaderRouter.use(bodyParser.json());
-
-// leaderRouter.route('/')
-// .all((req,res,next)=>{
-// 	res.statusCode=200;
-// 	res.setHeader('Content-Type','text/plain');
-// 	next();
-// })
-// .get((req,res,next)=>{
-// 	res.end("Will send all the leaders to you!");
-// })
-// .post((req,res,next)=>{
-// 	res.end("Will add the leader " + req.body.name + " with details " + req.body.description);
-// })
-// .put((req,res,next)=>{
-// 	res.statusCode = 403;
-// 	res.end("PUT operation is not supoorted on /leaders");
-// })
-// .delete((req,res,next)=>{
-// 	res.end("Will delete all the leaders!");
-// });
-
-
-// leaderRouter.route('/:leaderId')
-// .get((req,res,next) => {
-//     res.end('Will send details of the leader: ' + req.params.leaderId +' to you!');
-// })
-// .post((req,res,next) => {
-//   res.statusCode = 403;
-//   res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
-// })
-// .put((req,res,next) => {
-//   res.write('Updating the leader: ' + req.params.leaderId + '\n');
-//   res.end('Will update the leader: ' + req.body.name + 
-//         ' with details: ' + req.body.description);
-// })
-// .delete((req,res,next) => {
-//     res.end('Deleting leader: ' + req.params.leaderId);
-// });
-
-
-// module.exports = leaderRouter;
